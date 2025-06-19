@@ -1,0 +1,13 @@
+diff --git a/node_modules/zarr-gl/package.json b/node_modules/zarr-gl/package.json
+index af2fd82..60adbba 100644
+--- a/node_modules/zarr-gl/package.json
++++ b/node_modules/zarr-gl/package.json
+@@ -7,7 +7,7 @@
+   "module": "dist/zarr-gl.js",
+   "types": "dist/index.d.ts",
+   "exports": {
+-    "default": "dist/zarr-gl.js"
++    "default": "./dist/zarr-gl.js"
+   },
+   "files": [
+     "/dist"

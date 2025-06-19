@@ -1,27 +1,62 @@
 {
-  "name": "atlantis_vis",
+  "name": "zarr_vis",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@carbonplan/colormaps": "^4.0.0",
+    "@carbonplan/components": "^13.2.0",
+    "@carbonplan/icons": "^2.0.0",
+    "@carbonplan/maps": "^3.4.1",
+    "@carbonplan/theme": "^8.0.0",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@turf/turf": "^6.5.0",
+    "axios": "^1.10.0",
+    "chroma-js": "^2.4.2",
+    "geotiff": "^2.1.4-beta.0",
+    "mapbox-gl": "^3.12.0",
+    "next": "15.3.3",
+    "phosphor-react": "^1.4.1",
+    "proj4": "^2.11.0",
+    "qs": "^6.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.3"
+    "react-draggable": "^4.4.6",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^6.0.3",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "zarr-gl": "^0.3.0"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
+    "@types/chroma-js": "^3.1.1",
+    "@types/leaflet": "^1.9.18",
+    "@types/ndarray": "^1.0.14",
+    "@types/node": "^20.19.1",
+    "@types/proj4": "^2.5.6",
+    "@types/qs": "^6.14.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.29.0",
     "eslint-config-next": "15.3.3",
-    "@eslint/eslintrc": "^3"
-  }
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "patch-package": "^8.0.0",
+    "postcss": "^8.5.6",
+    "postinstall-postinstall": "^2.1.0",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
