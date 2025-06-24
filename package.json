@@ -2,6 +2,7 @@
   "name": "zarr_vis",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://noc-oi.github.io/zarr_vis",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
