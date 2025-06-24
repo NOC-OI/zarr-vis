@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
     "@carbonplan/colormaps": "^4.0.0",
@@ -51,6 +52,7 @@
     "eslint-config-next": "15.3.3",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
+    "gh-pages": "^6.3.0",
     "patch-package": "^8.0.0",
     "postcss": "^8.5.6",
     "postinstall-postinstall": "^2.1.0",

@@ -1,6 +1,6 @@
 import { useLayersManagementHandle } from '@/application/layers-management';
 import { keyable } from '@/entities/models/keyable';
-import { faLayerGroup, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faMap } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { DataExplorationSelection } from '../data-exploration';
 import { InfoButtonBox } from '../info-button-box';
@@ -62,15 +62,15 @@ export function SideBar({ listLayers }: SideBarProps) {
             id={'data_exploration'}
             onClick={handleShowSelection}
             active={sideBarOption === 'data_exploration'}
-            icon={faLayerGroup}
+            icon={faMap}
           />
-          <SideBarLink
+          {/* <SideBarLink
             title={'Clean map'}
             id="clean_map"
             onClick={handleEraseLayers}
             active={false}
             icon={faTrash}
-          />
+          /> */}
         </div>
         <div>
           <DataExplorationSelection

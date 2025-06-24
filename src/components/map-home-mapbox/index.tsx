@@ -43,7 +43,8 @@ export function MapHomeMapbox() {
     if (node !== null) {
       map.current = new mapboxgl.Map({
         container: node,
-        style: 'mapbox://styles/mapbox/satellite-v9',
+        // use normal mapbox styles
+        style: 'mapbox://styles/mapbox/streets-v9',
         // minZoom,
         // maxZoom,
         // maxBounds,

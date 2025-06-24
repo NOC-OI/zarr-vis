@@ -87,15 +87,6 @@ export const layersJson = {
         },
         scale: [30, 37]
       },
-      'tos_con.zarr': {
-        url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/tos_con.zarr',
-        dataType: 'ZARR',
-        content: 'sea_surface_conservative_temperature',
-        params: {
-          variable: 'tos_con'
-        },
-        scale: [5, 15]
-      },
       'Currents canvas': {
         url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/',
         dataType: 'velocity-ZARR',
