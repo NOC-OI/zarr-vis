@@ -138,9 +138,11 @@ export function reprojectData(geojsonData, sourceProjection, targetProjection) {
   };
 }
 
-export const TILE_SERVER_URL: string | undefined = 'https://imfe-pilot-tileserver.noc.ac.uk/';
+export const TILE_SERVER_URL: string =
+  process.env.NEXT_PUBLIC_TILE_SERVER_URL || 'http://imfe-pilot-tileserver.noc.ac.uk/';
 
-export const ZARR_TILE_SERVER_URL: string | undefined = 'https://atlantis44.xyz/';
+export const ZARR_TILE_SERVER_URL: string =
+  process.env.NEXT_PUBLIC_ZARR_TILE_SERVER_URL || 'http://atlantis44.xyz/';
 
 export const defaultView: [number, number] = [54, 0];
 export const defaultZoom = 6;
