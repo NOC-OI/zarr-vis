@@ -13,16 +13,19 @@ const roboto = Roboto({
   subsets: ['latin'],
   variable: '--font-roboto'
 });
-
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isProd = process.env.NODE_ENV === 'production';
   return (
     <html lang="en">
       <head>
-        <Script src="/libs/windy.js" strategy="afterInteractive" />
+        <Script
+          src={isProd ? '/zarr-vis/libs/windy.js' : '/libs/windy.js'}
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${roboto.variable}`}>
         <div className="m-0 p-0 h-[100%]">{children}</div>
