@@ -138,8 +138,6 @@ export function reprojectData(geojsonData, sourceProjection, targetProjection) {
   };
 }
 
-export const JOSBaseUrl: string | undefined = process.env.NEXT_PUBLIC_JASMIN_OBJECT_STORE_URL;
-
 export const TILE_SERVER_URL: string | undefined = 'https://imfe-pilot-tileserver.noc.ac.uk/';
 
 export const ZARR_TILE_SERVER_URL: string | undefined = 'https://atlantis44.xyz/';
