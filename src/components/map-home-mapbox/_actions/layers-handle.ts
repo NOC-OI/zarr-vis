@@ -111,21 +111,18 @@ export async function changeMapColors(actualLayer: string[], selectedLayers: key
   return await generateSelectedLayer(actualLayer, selectedLayers, map);
 }
 
-export async function changeMapDate(actualLayer: string[], selectedLayers: keyable, map: any) {
-  const layerToBeChanged = Array.isArray(actualLayer) ? actualLayer[0] : actualLayer;
-  const layers = map.current.getStyle().layers;
-
-  for (const styleLayer of layers) {
-    if (styleLayer.id.includes(layerToBeChanged)) {
-      let sourceId;
-      if (map.current.getLayer(styleLayer.id)) {
-        sourceId = (map.current.getLayer(styleLayer.id) as mapboxgl.RasterLayer)?.source;
-        map.current.removeLayer(styleLayer.id);
-      }
-      if (sourceId && map.current.getSource(sourceId)) {
-        map.current.removeSource(sourceId);
-      }
+export async function changeMapDimensions(
+  actualLayer: string[],
+  selectedLayers: keyable,
+  map: any,
+  windyLayerRef: any
+) {
+  if (selectedLayers[actualLayer[0]].dataType.includes('velocity')) {
+    if (windyLayerRef.current) {
+      windyLayerRef.current.remove(map);
     }
+  } else {
+    removeLayerFromMap(actualLayer, map, windyLayerRef);
   }
-  return await generateSelectedLayer(actualLayer, selectedLayers, map);
+  return await generateSelectedLayer(actualLayer, selectedLayers, map, windyLayerRef);
 }

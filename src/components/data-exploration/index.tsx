@@ -1,4 +1,3 @@
-// import { Info } from 'phosphor-react'
 import { keyable } from '@/entities/models/keyable';
 import { DataExplorationType } from './data-exploration-type';
 interface DataExplorationSelectionProps {

@@ -40,7 +40,7 @@ export const LayersManagementHandleProvider: React.FC<LayersManagementHandleProv
   const [showWindLayer, setShowWindLayer] = useState({});
   useEffect(() => {
     if (Object.keys(selectedLayers).length > 0 && actualLayer[0]) {
-      if (['zoom', 'opacity', 'update-colors', 'update-zarr-date'].includes(layerAction)) {
+      if (['zoom', 'opacity', 'update-colors', 'update-dimensions'].includes(layerAction)) {
         if (selectedLayers[actualLayer[0]].dataType === 'carbonplan') {
           const newSelectedLayer = selectedLayers[actualLayer[0]];
           setZarrLayerProps((selectedLayers: any) => {

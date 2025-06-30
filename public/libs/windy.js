@@ -11,15 +11,15 @@
 */
 
 var Windy = function (params) {
-  var VELOCITY_SCALE = 0.111;             // scale for wind velocity (completely arbitrary--this value looks nice)
-  var INTENSITY_SCALE_STEP = 1;            // step size of particle intensity color scale
-  var MAX_WIND_INTENSITY = 10;              // wind velocity at which particle intensity is maximum (m/s)
-  var MAX_PARTICLE_AGE = 100;                // max number of frames a particle is drawn before regeneration
-  var PARTICLE_LINE_WIDTH = 1.5;              // line width of a drawn particle
-  var PARTICLE_MULTIPLIER = 2 / 30;              // particle count scalar (completely arbitrary--this values looks nice)
-  var PARTICLE_REDUCTION = 0.5;            // reduce particle count to this much of normal for mobile devices
-  var FRAME_RATE = 60;                      // desired milliseconds per frame
-  var BOUNDARY = 0.45;
+  var VELOCITY_SCALE = params.settings && params.settings.velocityScale ? params.settings.velocityScale : 0.111
+  var INTENSITY_SCALE_STEP = params.settings && params.settings.intensityScaleStep ? params.settings.intensityScaleStep : 1;
+  var MAX_WIND_INTENSITY = params.settings && params.settings.maxWindIntensity ? params.settings.maxWindIntensity : 10;
+  var MAX_PARTICLE_AGE = params.settings && params.settings.maxParticleAge ? params.settings.maxParticleAge : 100;
+  var PARTICLE_LINE_WIDTH = params.settings && params.settings.particleLineWidth ? params.settings.particleLineWidth : 1.5;
+  var PARTICLE_MULTIPLIER = params.settings && params.settings.particleMultiplier ? params.settings.particleMultiplier : 2 / 30;
+  var PARTICLE_REDUCTION = params.settings && params.settings.particleReduction ? params.settings.particleReduction : 0.5;
+  var FRAME_RATE = params.settings && params.settings.frameRate ? params.settings.frameRate : 60;
+  var BOUNDARY = params.settings && params.settings.boundary ? params.settings.boundary : 0.45;
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
   var TRANSPARENT_BLACK = [255, 0, 0, 0];

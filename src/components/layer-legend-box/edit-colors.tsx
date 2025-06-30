@@ -35,7 +35,7 @@ export function EditColors({
       newScaleLimits = scaleLimits.map(value => parseFloat(value.toString()));
     } catch (error) {
       console.error('Invalid scale limits:', error);
-      return true; // If parsing fails, return true to indicate invalid input
+      return true;
     }
 
     if (
@@ -57,8 +57,6 @@ export function EditColors({
   }
 
   const handleSubmit = async () => {
-    const setState = setSelectedLayers;
-    const setActualLayerState = setActualLayer;
     if (['COG', 'ZARR', 'carbonplan', 'zarrgl'].includes(layerLegend[layerLegendName].dataType)) {
       if (checkInputValue()) {
         setError('Please enter valid values');
@@ -69,9 +67,9 @@ export function EditColors({
         return;
       }
     }
-    setActualLayerState([layerLegend[layerLegendName].selectedLayersKey]);
+    setActualLayer([layerLegend[layerLegendName].selectedLayersKey]);
     setLayerAction('update-colors');
-    setState(selectedLayers => {
+    setSelectedLayers(selectedLayers => {
       const newSelectedLayers = { ...selectedLayers };
       newSelectedLayers[layerLegend[layerLegendName].selectedLayersKey] = {
         ...newSelectedLayers[layerLegend[layerLegendName].selectedLayersKey],

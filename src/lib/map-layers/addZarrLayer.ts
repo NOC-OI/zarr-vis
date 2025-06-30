@@ -62,10 +62,6 @@ export class GetZarrLayer {
 
     const tileServerEnpoint = 'tiles/WebMercatorQuad/{z}/{x}/{y}@1x';
     const newUrl = `${ZARR_TILE_SERVER_URL}${tileServerEnpoint}?${queryString}`;
-    // const bounds = [
-    //   -16.015151515151516, 45.99324324440821, 13.015151515151516,
-    //   62.7499971120371,
-    // ]
     return {
       id: this.actualLayer,
       type: 'raster',

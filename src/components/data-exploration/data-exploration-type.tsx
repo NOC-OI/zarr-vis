@@ -1,7 +1,6 @@
 import { StackSimple } from 'phosphor-react';
 import { useState } from 'react';
 import { DataExplorationTypeOptions } from './data-exploration-type-options';
-// import { LayerTypeContainer } from './styles'
 
 interface keyable {
   [key: string]: any;

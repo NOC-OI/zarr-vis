@@ -2,7 +2,6 @@ import { keyable } from '@/entities/models/keyable';
 import { GetCOGLayer } from '@/lib/map-layers/addGeoraster';
 import {
   calculateColorsForLegend,
-  colorScale,
   defaultOpacity,
   getLegendCapabilities,
   parseRangeString,
@@ -64,68 +63,62 @@ export function getPreviousOpacityValue(content: string, selectedLayers: any) {
 }
 
 export async function handleClickLegend(
-  subLayers,
+  layerInfo,
   subLayer,
   setLayerLegend,
   content,
   selectedLayers?
 ) {
   const legendLayerName = `${content}_${subLayer}`;
-  if (subLayers[subLayer].dataType === 'WMS') {
-    const newParams = subLayers[subLayer].params;
-    newParams.request = 'GetLegendGraphic';
-    // newParams.layers = newParams.layers
-    async function getURILegend(newParams: any) {
-      let responseUrl = await getLegendCapabilities(subLayers[subLayer].url, newParams.layers);
-      if (!responseUrl) {
-        responseUrl = `${subLayers[subLayer].url}?request=${newParams.request}&layer=${newParams.layers}`;
-        responseUrl = responseUrl.replace('layers=', 'layer=');
-        responseUrl = responseUrl.replace('amp;', '');
-        responseUrl = responseUrl + '&SERVICE=wms&format=image/png';
-      }
-      return responseUrl;
+  if (layerInfo.dataType === 'WMS') {
+    if (Array.isArray(layerInfo.params.layers)) {
+      layerInfo.params.layers = layerInfo.params.layers[0];
     }
-    const responseUrl = await getURILegend(newParams);
-    // const colorName = selectedLayers
-    //   ? selectedLayers[`${content}_${subLayer}`].colors
-    //   : typeof subLayers[subLayer].colors === 'string'
-    //     ? subLayers[subLayer].colors
-    //     : subLayers[subLayer].colors[0];
+    if (!layerInfo.capabilititesInfo) {
+      layerInfo.capabilititesInfo = await getLegendCapabilities(
+        layerInfo.url,
+        layerInfo.params.layers
+      );
+    }
+    const colorName = selectedLayers
+      ? selectedLayers[`${content}_${subLayer}`].colors
+      : layerInfo.colors;
     setLayerLegend((layerLegend: any) => {
       const newLayerLegend = { ...layerLegend };
       delete newLayerLegend[legendLayerName];
       newLayerLegend[legendLayerName] = {
+        layerInfo: { ...layerInfo, colors: colorName, styles: layerInfo.capabilititesInfo.styles },
         layerName: legendLayerName,
         legend: [[''], ['']],
-        dataType: subLayers[subLayer].dataType,
-        url: responseUrl,
+        dataType: layerInfo.dataType,
+        url: layerInfo.capabilititesInfo.legends,
         selectedLayersKey: legendLayerName
       };
       return newLayerLegend;
     });
-  } else if (subLayers[subLayer].dataType === 'COG') {
+  } else if (layerInfo.dataType === 'COG') {
     let scale: number[] | number = [0, 1];
     if (!selectedLayers) {
-      if (typeof subLayers[subLayer].url === 'string') {
-        if (!subLayers[subLayer].scale) {
-          const getCOGLayer = new GetCOGLayer(subLayers[subLayer], subLayer);
+      if (typeof layerInfo.url === 'string') {
+        if (!layerInfo.scale) {
+          const getCOGLayer = new GetCOGLayer(layerInfo, subLayer);
           await getCOGLayer.getStats().then(stats => {
             const minValue = stats.b1.percentile_2.toFixed(4);
             const maxValue = stats.b1.percentile_98.toFixed(4);
             scale = [minValue, maxValue];
           });
         } else {
-          scale = subLayers[subLayer].scale;
+          scale = layerInfo.scale;
         }
       } else {
         let minValue;
         let maxValue;
-        if (subLayers[subLayer].scale) {
-          scale = subLayers[subLayer].scale;
+        if (layerInfo.scale) {
+          scale = layerInfo.scale;
         } else {
           scale = await Promise.all(
-            await subLayers[subLayer].url.map(async newUrl => {
-              const newSubLayer = { ...subLayers[subLayer] };
+            await layerInfo.url.map(async newUrl => {
+              const newSubLayer = { ...layerInfo };
               newSubLayer.url = newUrl;
               const getCOGLayer = new GetCOGLayer(newSubLayer, subLayer);
               const stats = await getCOGLayer.getStats();
@@ -154,8 +147,8 @@ export async function handleClickLegend(
     }
     const colorName = selectedLayers
       ? selectedLayers[`${content}_${subLayer}`].colors
-      : subLayers[subLayer].colors
-        ? subLayers[subLayer].colors
+      : layerInfo.colors
+        ? layerInfo.colors
         : 'ocean_r';
     const { listColors, listColorsValues } = calculateColorsForLegend(colorName, scale, 30);
     setLayerLegend((layerLegend: any) => {
@@ -163,43 +156,20 @@ export async function handleClickLegend(
       delete newLayerLegend[legendLayerName];
       newLayerLegend[legendLayerName] = {
         layerName: legendLayerName,
-        layerInfo: { ...subLayers[subLayer], colors: colorName },
+        layerInfo: { ...layerInfo, colors: colorName },
         selectedLayersKey: `${content}_${subLayer}`,
         scale,
-        dataDescription: subLayers[subLayer].dataDescription,
+        dataDescription: layerInfo.dataDescription,
         legend: [listColors, listColorsValues],
-        dataType: subLayers[subLayer].dataType
+        dataType: layerInfo.dataType
       };
       return newLayerLegend;
     });
-  } else if (subLayers[subLayer].dataType === 'velocity') {
-    const newParams = subLayers[subLayer].params;
-    newParams.request = 'GetLegendGraphic';
-
-    async function getURILegend(newParams: any) {
-      let responseUrl = await getLegendCapabilities(subLayers[subLayer].url, newParams.layers);
-      if (!responseUrl) {
-        responseUrl = `${subLayers[subLayer].url}/wms?request=${newParams.request}&layer=${newParams.layers[2]}`;
-        responseUrl = responseUrl.replace('layers=', 'layer=');
-        responseUrl = responseUrl.replace('amp;', '');
-        responseUrl = responseUrl + '&SERVICE=wms&format=image/png';
-      }
-      setLayerLegend((layerLegend: any) => {
-        const newLayerLegend = { ...layerLegend };
-        delete newLayerLegend[legendLayerName];
-        newLayerLegend[legendLayerName] = {
-          layerName: legendLayerName,
-          url: responseUrl
-        };
-        return newLayerLegend;
-      });
-    }
-    await getURILegend(newParams);
-  } else if (subLayers[subLayer].dataType === 'ZARR') {
+  } else if (layerInfo.dataType === 'ZARR') {
     let scale;
     if (!selectedLayers) {
-      if (subLayers[subLayer].scale) {
-        scale = subLayers[subLayer].scale;
+      if (layerInfo.scale) {
+        scale = layerInfo.scale;
       } else {
         scale = [0, 1];
       }
@@ -208,33 +178,33 @@ export async function handleClickLegend(
     }
     const colorName = selectedLayers
       ? selectedLayers[`${content}_${subLayer}`].colors
-      : subLayers[subLayer].colors
-        ? subLayers[subLayer].colors
+      : layerInfo.colors
+        ? layerInfo.colors
         : 'jet';
 
     const { listColors, listColorsValues } = calculateColorsForLegend(colorName, scale, 30);
     if (selectedLayers) {
-      subLayers[subLayer].dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
+      layerInfo.dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
     }
     setLayerLegend((layerLegend: any) => {
       const newLayerLegend = { ...layerLegend };
       delete newLayerLegend[legendLayerName];
       newLayerLegend[legendLayerName] = {
         layerName: legendLayerName,
-        layerInfo: { ...subLayers[subLayer], colors: colorName },
+        layerInfo: { ...layerInfo, colors: colorName },
         selectedLayersKey: `${content}_${subLayer}`,
         scale,
-        dataDescription: subLayers[subLayer].dataDescription,
+        dataDescription: layerInfo.dataDescription,
         legend: [listColors, listColorsValues],
-        dataType: subLayers[subLayer].dataType
+        dataType: layerInfo.dataType
       };
       return newLayerLegend;
     });
-  } else if (['carbonplan', 'zarrgl'].includes(subLayers[subLayer].dataType)) {
+  } else if (['carbonplan', 'zarrgl'].includes(layerInfo.dataType)) {
     let scale;
     if (!selectedLayers) {
-      if (subLayers[subLayer].scale) {
-        scale = subLayers[subLayer].scale;
+      if (layerInfo.scale) {
+        scale = layerInfo.scale;
       } else {
         scale = [0, 1];
       }
@@ -243,41 +213,57 @@ export async function handleClickLegend(
     }
     const colorName = selectedLayers
       ? selectedLayers[`${content}_${subLayer}`].colors
-      : subLayers[subLayer].colors
-        ? subLayers[subLayer].colors
+      : layerInfo.colors
+        ? layerInfo.colors
         : 'jet';
 
     const { listColors, listColorsValues } = calculateColorsForLegend(colorName, scale, 30);
     if (selectedLayers) {
-      subLayers[subLayer].dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
+      layerInfo.dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
     }
     setLayerLegend((layerLegend: any) => {
       const newLayerLegend = { ...layerLegend };
       delete newLayerLegend[legendLayerName];
       newLayerLegend[legendLayerName] = {
         layerName: legendLayerName,
-        layerInfo: { ...subLayers[subLayer], colors: colorName },
+        layerInfo: { ...layerInfo, colors: colorName },
         selectedLayersKey: `${content}_${subLayer}`,
         scale,
-        dataDescription: subLayers[subLayer].dataDescription,
+        dataDescription: layerInfo.dataDescription,
         legend: [listColors, listColorsValues],
-        dataType: subLayers[subLayer].dataType
+        dataType: layerInfo.dataType
       };
       return newLayerLegend;
     });
-  } else if (subLayers[subLayer].dataType === 'velocity-ZARR') {
+  } else if (layerInfo.dataType === 'velocity-ZARR') {
     if (selectedLayers) {
-      subLayers[subLayer].dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
+      layerInfo.dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
     }
     setLayerLegend((layerLegend: any) => {
       const newLayerLegend = { ...layerLegend };
       delete newLayerLegend[legendLayerName];
       newLayerLegend[legendLayerName] = {
         layerName: legendLayerName,
-        layerInfo: { ...subLayers[subLayer] },
+        layerInfo: { ...layerInfo },
         selectedLayersKey: `${content}_${subLayer}`,
-        dataDescription: subLayers[subLayer].dataDescription,
-        dataType: subLayers[subLayer].dataType
+        dataDescription: layerInfo.dataDescription,
+        dataType: layerInfo.dataType
+      };
+      return newLayerLegend;
+    });
+  } else if (layerInfo.dataType === 'velocity-WMS') {
+    if (selectedLayers) {
+      layerInfo.dimensions = selectedLayers[`${content}_${subLayer}`].dimensions;
+    }
+    setLayerLegend((layerLegend: any) => {
+      const newLayerLegend = { ...layerLegend };
+      delete newLayerLegend[legendLayerName];
+      newLayerLegend[legendLayerName] = {
+        layerName: legendLayerName,
+        layerInfo: { ...layerInfo },
+        selectedLayersKey: `${content}_${subLayer}`,
+        dataDescription: layerInfo.dataDescription,
+        dataType: layerInfo.dataType
       };
       return newLayerLegend;
     });
@@ -472,21 +458,19 @@ export async function handleChangeMapLayerAndAddLegend(
   zarrLayerProps?: any,
   setZarrLayerProps?: any
 ) {
-  const color = subLayers[subLayer].colors
-    ? subLayers[subLayer].colors
-    : colorScale[Math.floor(Math.random() * 100)];
   const checked = e.target.checked;
-  const value = e.target.value;
-  const copySubLayers = { ...subLayers };
+  const layerInfo = JSON.parse(e.target.value);
   if (checked) {
-    if (['carbonplan', 'zarrgl'].includes(copySubLayers[subLayer].dataType)) {
-      const dimensions = subLayers[subLayer].dimensions;
-      Object.keys(dimensions).forEach(key => {
-        if (dimensions[key].values.includes('range')) {
-          dimensions[key].values = parseRangeString(dimensions[key].values);
-        }
-      });
-      copySubLayers[subLayer].dimensions = dimensions;
+    if (['carbonplan', 'zarrgl', 'COG'].includes(layerInfo.dataInfo.dataType)) {
+      if (subLayers[subLayer].dimensions) {
+        const dimensions = subLayers[subLayer].dimensions;
+        Object.keys(dimensions).forEach(key => {
+          if (dimensions[key].values.includes('range')) {
+            dimensions[key].values = parseRangeString(dimensions[key].values);
+          }
+        });
+        layerInfo.dataInfo.dimensions = dimensions;
+      }
     } else if (subLayers[subLayer].dataType.includes('ZARR')) {
       let layerUrl = subLayers[subLayer].url;
       if (subLayers[subLayer].dataType.includes('velocity')) {
@@ -496,17 +480,17 @@ export async function handleChangeMapLayerAndAddLegend(
 
       const response = await fetch(url);
       const timeValues = await response.json();
-      copySubLayers[subLayer].dimensions = {
+      layerInfo.dataInfo.dimensions = {
         time: {
           values: timeValues,
           selected: 0
         }
       };
-      if (!copySubLayers[subLayer].colors) {
-        copySubLayers[subLayer].colors = 'jet';
+      if (!layerInfo.dataInfo.colors) {
+        layerInfo.dataInfo.colors = 'jet';
       }
-      if (copySubLayers[subLayer].params.additional_dims) {
-        const additionalDims = copySubLayers[subLayer].params.additional_dims;
+      if (layerInfo.dataInfo.params.additional_dims) {
+        const additionalDims = layerInfo.dataInfo.params.additional_dims;
         await Promise.all(
           additionalDims.map(async (additionalDimension: any) => {
             const url = `${ZARR_TILE_SERVER_URL}dimension/${additionalDimension}?url=${encodeURIComponent(
@@ -514,15 +498,32 @@ export async function handleChangeMapLayerAndAddLegend(
             )}`;
             const response = await fetch(url);
             const dimensionValues = await response.json();
-            copySubLayers[subLayer].dimensions[additionalDimension] = {
+            layerInfo.dataInfo.dimensions[additionalDimension] = {
               values: dimensionValues,
               selected: 0
             };
           })
         );
       }
+    } else if (layerInfo.dataInfo.dataType.includes('WMS')) {
+      const localLayers = Array.isArray(layerInfo.dataInfo.params.layers)
+        ? layerInfo.dataInfo.params.layers[0]
+        : layerInfo.dataInfo.params.layers;
+      let url = layerInfo.dataInfo.url;
+
+      if (layerInfo.dataInfo.dataType.includes('velocity')) {
+        url += '/wms';
+      }
+      const capabilititesInfo = await getLegendCapabilities(url, localLayers);
+      layerInfo.dataInfo.capabilititesInfo = capabilititesInfo;
+      if (capabilititesInfo.styles) {
+        layerInfo.dataInfo.colors = capabilititesInfo.styles[0];
+      }
+      if (capabilititesInfo.dimensions) {
+        layerInfo.dataInfo.dimensions = capabilititesInfo.dimensions;
+      }
     }
-    handleClickLegend(copySubLayers, subLayer, setLayerLegend, content);
+    handleClickLegend(layerInfo.dataInfo, subLayer, setLayerLegend, content);
   } else {
     const legendLayerName = `${content}_${subLayer}`;
     if (layerLegend[legendLayerName]) {
@@ -535,41 +536,30 @@ export async function handleChangeMapLayerAndAddLegend(
   }
   await handleChangeMapLayer(
     checked,
-    value,
+    layerInfo,
     setActualLayer,
     setOpacityIsClicked,
     setLayerAction,
     setSelectedLayers,
     selectedLayers,
-    color,
-    copySubLayers[subLayer].dimensions,
     zarrLayerProps,
     setZarrLayerProps
   );
 }
 export async function handleChangeMapLayer(
   checked: any,
-  value: any,
+  layerInfo: any,
   setActualLayer: any,
   setOpacityIsClicked: any,
   setLayerAction: any,
   setSelectedLayers: any,
   selectedLayers: any,
-  color?: any,
-  dimensionsValues?: any,
   zarrLayerProps?: any,
   setZarrLayerProps?: any
 ) {
-  const layerInfo = JSON.parse(value);
-  // if (color) {
-  //   layerInfo.dataInfo.colors = color;
-  // }
   setActualLayer([layerInfo.subLayer]);
   if (layerInfo.dataInfo.dataType === 'carbonplan') {
     if (checked) {
-      if (dimensionsValues) {
-        layerInfo.dataInfo.dimensions = dimensionsValues;
-      }
       await addMapLayer(
         layerInfo,
         setLayerAction,
@@ -584,9 +574,6 @@ export async function handleChangeMapLayer(
     }
   } else {
     if (checked) {
-      if (dimensionsValues) {
-        layerInfo.dataInfo.dimensions = dimensionsValues;
-      }
       await addMapLayer(layerInfo, setLayerAction, setSelectedLayers, selectedLayers);
     } else {
       setOpacityIsClicked(false);

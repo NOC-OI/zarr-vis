@@ -49,9 +49,6 @@ export function CarbonplanLayer({ layerInfo }: CarbonplanLayerProps) {
             display={true}
             clim={scale}
             opacity={opacity}
-            // source={'https://carbonplan-maps.s3.us-west-2.amazonaws.com/v2/demo/4d/tavg-prec-month'}
-            // variable={'climate'}
-            // selector={{ month, band }}
             source={layerInfo.url}
             variable={variable}
             selector={selector}

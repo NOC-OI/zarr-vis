@@ -10,9 +10,9 @@ export class AddCanvasLayer {
   height: number;
   windy: any;
   canvas: HTMLCanvasElement | null;
-  constructor(layerName: keyable) {
-    this.layerName = layerName;
-    this.url = layerName.url;
+  constructor() {
+    this.layerName = {};
+    this.url = '';
     this.layer = {};
     this.width = 256;
     this.height = 256;
@@ -63,9 +63,6 @@ export class AddCanvasLayer {
     const georaster = await this.parseData(data);
     const velocityData = {
       data: georaster.values,
-      // data: Object.values(georaster.values).map((value) => {
-      //   return value;
-      // }),
       header: {
         parameterUnit: 'm.s-1',
         parameterNumber: dataType === 'U' ? 2 : 3,
@@ -97,14 +94,14 @@ export class AddCanvasLayer {
           if (value === parseFloat('-32768')) {
             return null;
           }
-          return value * 0.001 - 0;
+          return value;
         }),
         header: {
           parameterUnit: 'm.s-1',
           parameterNumber: dataType === 'U' ? 2 : 3,
           dx: georaster.resolution.resolutionX,
           dy: georaster.resolution.resolutionY,
-          parameterNumberName: dataType === 'U' ? 'Eastward wind' : 'Northward wind',
+          parameterNumberName: dataType === 'U' ? 'Eastward currents' : 'Northward currents',
           la1: georaster.bbox[3],
           la2: georaster.bbox[1],
           parameterCategory: 2,
@@ -135,7 +132,9 @@ export class AddCanvasLayer {
     map.current.off('moveend');
   }
 
-  async create(map: any) {
+  async create(layerName: keyable, map: any) {
+    this.layerName = layerName;
+    this.url = layerName.url;
     let velocityDataU;
     let velocityDataV;
     if (this.layerName.dataType.includes('ZARR')) {
@@ -149,13 +148,15 @@ export class AddCanvasLayer {
         this.url,
         this.width,
         this.height,
-        this.layerName.params.layers[0]
+        this.layerName.params.layers[0],
+        this.layerName.dimensions
       );
       const wcsUrlV = await getWCSUrl(
         this.url,
         this.width,
         this.height,
-        this.layerName.params.layers[1]
+        this.layerName.params.layers[1],
+        this.layerName.dimensions
       );
       velocityDataU = await this.loadGeoraster(wcsUrlU, 'U');
       velocityDataV = await this.loadGeoraster(wcsUrlV, 'V');
@@ -172,12 +173,21 @@ export class AddCanvasLayer {
     this.canvas.height = map.current.getCanvas().height;
     this.canvas.style.width = `${map.current.getContainer().clientWidth}px`;
     this.canvas.style.height = `${map.current.getContainer().clientHeight}px`;
-    // this.canvas.style.width = '100vw';
-    // this.canvas.style.height = '100vh';
 
     this.windy = new (window as any).Windy({
       canvas: this.canvas,
-      data: [velocityDataU, velocityDataV]
+      data: [velocityDataU, velocityDataV],
+      settings: {
+        velocityScale: 0.7,
+        intensityScaleStep: 1,
+        maxWindIntensity: 5,
+        maxParticleAge: 100,
+        particleLineWidth: 1.5,
+        particleMultiplier: 2 / 30,
+        particleReduction: 0.5,
+        frameRate: 60,
+        boundary: 0.45
+      }
     });
     map.current.getContainer().appendChild(this.canvas);
     let timeout: any;
@@ -253,16 +263,8 @@ export class AddCanvasLayer {
 
     map.current.once('style.load', function () {
       resetWind();
-      // map.current.setPaintProperty('water-fill', 'fill-color', '#24293A');
     });
 
     resetWind();
-    // ADD CODE HERE. THE CODE BELOW WAS FOR LEAFLET. UPDATE TO THE MAPBOX ONE USING THE CODE THAT i PROVIDED TO YOU
-    // this.layer = L.velocityLayer({
-    //   data: [velocityDataU, velocityDataV],
-    //   maxVelocity: 3,
-    //   velocityScale: 0.2,
-    //   minVelocity: 0
-    // });
   }
 }

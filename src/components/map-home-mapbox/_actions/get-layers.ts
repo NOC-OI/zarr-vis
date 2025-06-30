@@ -16,7 +16,6 @@ export async function generateSelectedLayer(
     const layerName = selectedLayers[actual];
     const layerId = actual;
 
-    // Remove existing layer if it already exists
     if (map.current && map.current.getLayer(layerId)) {
       map.current.removeLayer(layerId);
       if (map.current.getSource(layerId)) {
@@ -38,8 +37,7 @@ export async function generateSelectedLayer(
       } else if (layerName.dataType === 'ZARR') {
         layer = await getZarrLayer(layerName, actual);
       } else if (layerName.dataType.includes('velocity')) {
-        layer = await getVelocityLayer(layerName, actual, map);
-        windyLayerRef.current = layer;
+        await getVelocityLayer(layerName, map, windyLayerRef);
       }
       if (Object.keys(layer).length > 0 && !layerName.dataType.includes('velocity')) {
         if (map.current) {
@@ -91,18 +89,14 @@ export async function getZARRGLLayer(layerName: keyable, actual: string, map: an
   return layer;
 }
 
-// export async function getVelocityLayer(layerName: keyable, actual: any) {
-//   const getCanvasLayer = new AddCanvasLayer(layerName)
-//   await getCanvasLayer.create()
-//   const layer = getCanvasLayer.layer
-//   layer.options.attribution = actual
-//   return layer
-// }
-
-export async function getVelocityLayer(layerName: keyable, actual: string, map: any) {
-  const getCanvasLayer = new AddCanvasLayer(layerName);
-  await getCanvasLayer.create(map);
-  return getCanvasLayer;
+export async function getVelocityLayer(layerName: keyable, map: any, windyLayerRef: any) {
+  if (windyLayerRef?.current) {
+    await windyLayerRef.current.create(layerName, map);
+  } else {
+    const getCanvasLayer = new AddCanvasLayer();
+    await getCanvasLayer.create(layerName, map);
+    windyLayerRef.current = getCanvasLayer;
+  }
 }
 
 export async function getZarrLayer(layerName: keyable, actual: string) {
@@ -127,16 +121,21 @@ export async function getWMSLayer(layerName: keyable, actual: string) {
     request: 'GetMap',
     version: '1.3.0',
     layers: layerParams,
-    styles: layerName.params.style || '',
+    styles: layerName.colors || '',
     format: 'image/png',
     transparent: 'true',
     height: '256',
     width: '256',
     crs: 'EPSG:3857'
-    // bbox: '{bbox-epsg-3857}',
-  }).toString();
-
-  const tileUrl = `${layerName.url}?${query}&bbox={bbox-epsg-3857}`;
+  });
+  if (layerName.dimensions) {
+    Object.keys(layerName.dimensions).forEach(dimension => {
+      const selectedDimension =
+        layerName.dimensions[dimension].values[layerName.dimensions[dimension].selected];
+      query.append(dimension, selectedDimension);
+    });
+  }
+  const tileUrl = `${layerName.url}?${query.toString()}&bbox={bbox-epsg-3857}`;
 
   const layer = {
     id: actual,

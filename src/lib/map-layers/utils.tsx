@@ -7,13 +7,27 @@ export const colorScale = chroma.scale(['#f00', '#0f0', '#00f', 'gray']).mode('h
 
 export const defaultOpacity = 0.7;
 
-export function parseRangeString(rangeStr: string): number[] {
-  const match = rangeStr.match(/range\((\d+),\s*(\d+),\s*(\d+)\)/);
+export function parseRangeString(rangeStr: string): number[] | string[] {
+  let match = rangeStr.match(/range\((\d+),\s*(\d+),\s*(\d+)\)/);
+  let time = false;
   if (!match) {
-    throw new Error(`Invalid range format: ${rangeStr}`);
+    match = rangeStr.match(/range\((\d{4}-\d{2}-\d{2}),\s*(\d{4}-\d{2}-\d{2}),\s*day=(\d+)\)/);
+    if (!match) {
+      throw new Error('Invalid range string format');
+    }
+    time = true;
   }
-
   const [, startStr, endStr, stepStr] = match;
+  if (time) {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+    const step = parseInt(stepStr, 10);
+    const result: string[] = [];
+    for (let date = startDate; date <= endDate; date.setDate(date.getDate() + step)) {
+      result.push(date.toISOString().split('T')[0]);
+    }
+    return result;
+  }
   const start = parseInt(startStr, 10);
   const end = parseInt(endStr, 10);
   const step = parseInt(stepStr, 10);
@@ -22,7 +36,6 @@ export function parseRangeString(rangeStr: string): number[] {
   for (let i = start; i < end; i += step) {
     result.push(i);
   }
-
   return result;
 }
 
@@ -159,7 +172,14 @@ export const defaultWMSBoundsMapbox: [[number, number], [number, number]] = [
 ];
 
 export function getUrlTileServer(layerName: keyable, url: string) {
-  const newUrl: string = layerName.signed_url ? (layerName.signed_url as string) : url;
+  let newUrl: string = layerName.signed_url ? (layerName.signed_url as string) : url;
+  if (layerName.dimensions) {
+    Object.keys(layerName.dimensions).forEach(dimension => {
+      const selectedDimension =
+        layerName.dimensions[dimension].values[layerName.dimensions[dimension].selected];
+      newUrl = newUrl.replace(`((${dimension}))`, selectedDimension);
+    });
+  }
   const isUrlEncoded: boolean = !!layerName.signed_url;
   return [newUrl, isUrlEncoded];
 }
@@ -168,8 +188,16 @@ export function convertProjection(source: string, dest: string, point: [number, 
   return proj4(source, dest).forward([point[0], point[1]]);
 }
 
-export async function getWCSUrl(wcsUrl, width, height, layer) {
-  return `${wcsUrl}/wcs?service=WCS&version=2.0.1&request=GetCoverage&coverageId=${layer}&format=image/geotiff&SCALESIZE=i(${width}),j(${height})`;
+export async function getWCSUrl(wcsUrl, width, height, layer, dimensions = {}) {
+  let url: string = `${wcsUrl}/wcs?service=WCS&version=2.0.1&request=GetCoverage&coverageId=${layer}&format=image/geotiff&SCALESIZE=i(${width}),j(${height})`;
+  if (dimensions) {
+    Object.keys(dimensions).forEach(dimension => {
+      const selectedDimension = dimensions[dimension].values[dimensions[dimension].selected];
+      const dimensionCapitalized = dimension.charAt(0).toUpperCase() + dimension.slice(1);
+      url += `&subset=${dimensionCapitalized}("${selectedDimension}")`;
+    });
+  }
+  return url;
 }
 
 export async function getZarrWCSUrl(url, layerInfo, position) {
@@ -212,7 +240,7 @@ export async function getZarrWCSUrl(url, layerInfo, position) {
 export function parseCapabilities(xml) {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xml, 'text/xml');
-  const layers = {};
+  const layers: keyable = {};
   const layerNodes = xmlDoc.getElementsByTagName('Layer');
   for (let i = 0; i < layerNodes.length; i++) {
     const styles: string[] = [];
@@ -240,7 +268,16 @@ export function parseCapabilities(xml) {
         boundingBoxNode.getAttribute('maxy') || ''
       ];
     }
-    layers[layerName] = { styles, legends, bbox };
+    const dimensions = {};
+    const dimensionNodes = layerNode.getElementsByTagName('Dimension');
+    for (let j = 0; j < dimensionNodes.length; j++) {
+      const dimensionNode = dimensionNodes[j];
+      const dimensionName = dimensionNode.getAttribute('name') || '';
+      const values = dimensionNode.textContent ? dimensionNode.textContent.split(',') : [];
+      const selected = 0;
+      dimensions[dimensionName] = { values, selected };
+    }
+    layers[layerName] = { styles, legends, bbox, dimensions };
   }
   return layers;
 }
@@ -252,11 +289,16 @@ export async function getLegendCapabilities(url: string, layer: string) {
     const text = await response.text();
 
     const layers = parseCapabilities(text);
-    const searchAbleLayer = Array.isArray(layer) ? layer[2] : layer;
-    const legendUrl = layers[searchAbleLayer][1][0].replace('amp;', '');
-    return legendUrl;
+    const searchAbleLayer = Array.isArray(layer) ? layer[0] : layer;
+    const localLayer = layers[searchAbleLayer];
+    localLayer.legends.forEach((legend: string, index: number) => {
+      if (legend.includes('amp;')) {
+        localLayer.legends[index] = legend.replace('amp;', '');
+      }
+    });
+    return localLayer;
   } catch (error) {
     console.log('Error fetching legend capabilities:', error);
-    return '';
+    return {};
   }
 }

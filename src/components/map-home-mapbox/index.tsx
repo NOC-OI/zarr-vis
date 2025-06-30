@@ -11,7 +11,7 @@ import { CarbonplanLayer } from '../carbonplan-layer';
 import { generateSelectedLayer } from './_actions/get-layers';
 import {
   changeMapColors,
-  changeMapDate,
+  changeMapDimensions,
   changeMapOpacity,
   changeMapZoom,
   removeLayerFromMap
@@ -43,11 +43,8 @@ export function MapHomeMapbox() {
     if (node !== null) {
       map.current = new mapboxgl.Map({
         container: node,
-        // use normal mapbox styles
-        style: 'mapbox://styles/mapbox/streets-v9',
-        // minZoom,
-        // maxZoom,
-        // maxBounds,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        projection: 'mercator',
         dragRotate: false,
         pitchWithRotate: false,
         touchZoomRotate: true
@@ -93,7 +90,10 @@ export function MapHomeMapbox() {
         args: [actualLayer, selectedLayers, map, windyLayerRef]
       },
       'update-colors': { function: changeMapColors, args: [actualLayer, selectedLayers, map] },
-      'update-zarr-date': { function: changeMapDate, args: [actualLayer, selectedLayers, map] }
+      'update-dimensions': {
+        function: changeMapDimensions,
+        args: [actualLayer, selectedLayers, map, windyLayerRef]
+      }
     };
     if (actionMap[layerAction]) {
       handleLayerAction(actionMap, layerAction);
