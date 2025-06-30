@@ -26,7 +26,7 @@ Zarr is a powerful format for storing chunked, compressed N-dimensional arrays, 
 
 ## Datasets
 
-The app uses example outputs from the [**Near Present Day (NPD) NEMO ocean model**](https://github.com/NOC-MSM/NOC_Near_Present_Day) produced by the [National Oceanography Centre (NOC)](https://www.noc.ac.uk). These datasets are in Zarr format with curvilinear grids and multiple timesteps.
+The demo uses example outputs from the [**Near Present Day (NPD) NEMO ocean model**](https://github.com/NOC-MSM/NOC_Near_Present_Day) produced by the [National Oceanography Centre (NOC)](https://www.noc.ac.uk). These datasets are in Zarr format with curvilinear grids and multiple timesteps.
 
 For full details on the preprocessing steps, including reprojection, rechunking, and pyramid generation, see the [Medium article](https://medium.com/...).
 
