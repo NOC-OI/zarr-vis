@@ -26,6 +26,7 @@ export default function RootLayout({
           src={isProd ? '/zarr-vis/libs/windy.js' : '/libs/windy.js'}
           strategy="afterInteractive"
         />
+        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </head>
       <body className={`${roboto.variable}`}>
         <div className="m-0 p-0 h-[100%]">{children}</div>
