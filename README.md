@@ -99,7 +99,7 @@ For Python snippets and examples, see the [article](https://medium.com/...).
 
 > Example of visualizing a 10GB dataset in the browser using a carbonplan/maps adapted code. As you can see, you can easily change the timestamp, colormap, and map scale
 
-![Animated video showing velocity data from a zarr file being rendered as animated canvas in a map.](public/currents.gif)
+![Animated video showing velocity data from a zarr file being rendered as particle animation canvas in a map.](public/currents.gif)
 
 > Accessing Zarr data using the tile server and converting it into a canvas layer to represent the animated current fields on a map. You can interact with the dimensions of the data (time and depth).
 
