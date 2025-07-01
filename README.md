@@ -2,7 +2,7 @@
 
 **Live demo:** [https://noc-oi.github.io/zarr-vis](https://noc-oi.github.io/zarr-vis)
 
-**Article:** [Rendering Zarr in the Browser: The Good, the Bad, and the Surprisingly Fast](https://medium.com/)
+**Article:** [Zarr in the Browser — Fast, Flexible, and Surprisingly Powerful for Big Geo Data]([https://medium.com/](https://medium.com/@tobias.ramalho.ferreira/zarr-in-the-browser-fast-flexible-and-surprisingly-powerful-for-big-geo-data-eeb90ddf8a3d))
 
 ## Overview
 
@@ -28,7 +28,7 @@ Zarr is a powerful format for storing chunked, compressed N-dimensional arrays, 
 
 The demo uses example outputs from the [**Near Present Day (NPD) NEMO ocean model**](https://github.com/NOC-MSM/NOC_Near_Present_Day) produced by the [National Oceanography Centre (NOC)](https://www.noc.ac.uk). These datasets are in Zarr format with curvilinear grids and multiple timesteps.
 
-For full details on the preprocessing steps, including reprojection, rechunking, and pyramid generation, see the [Medium article](https://medium.com/...).
+For full details on the preprocessing steps, including reprojection, rechunking, and pyramid generation, see the [Medium article](https://medium.com/@tobias.ramalho.ferreira/zarr-in-the-browser-fast-flexible-and-surprisingly-powerful-for-big-geo-data-eeb90ddf8a3d).
 
 ## Getting Started
 
