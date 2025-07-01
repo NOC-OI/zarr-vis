@@ -2,7 +2,7 @@
 
 **Live demo:** [https://noc-oi.github.io/zarr-vis](https://noc-oi.github.io/zarr-vis)
 
-**Article:** [Zarr in the Browser — Fast, Flexible, and Surprisingly Powerful for Big Geo Data]([https://medium.com/](https://medium.com/@tobias.ramalho.ferreira/zarr-in-the-browser-fast-flexible-and-surprisingly-powerful-for-big-geo-data-eeb90ddf8a3d))
+**Article:** [Zarr in the Browser — Fast, Flexible, and Surprisingly Powerful for Big Geo Data](https://medium.com/@tobias.ramalho.ferreira/zarr-in-the-browser-fast-flexible-and-surprisingly-powerful-for-big-geo-data-eeb90ddf8a3d)
 
 ## Overview
 
