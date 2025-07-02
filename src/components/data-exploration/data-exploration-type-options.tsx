@@ -98,16 +98,20 @@ export function DataExplorationTypeOptions({
               }
               className="cursor-pointer hover:text-yellow-700"
             />
-            {!subLayer.includes('canvas') && (
-              <FontAwesomeIcon
-                icon={faList}
-                title="Show Legend"
-                onClick={() =>
-                  handleClickLegend(subLayers, subLayer, setLayerLegend, content, selectedLayers)
-                }
-                className="cursor-pointer hover:text-yellow-700"
-              />
-            )}
+            <FontAwesomeIcon
+              icon={faList}
+              title="Show Legend"
+              onClick={() =>
+                handleClickLegend(
+                  subLayers[subLayer],
+                  subLayer,
+                  setLayerLegend,
+                  content,
+                  selectedLayers
+                )
+              }
+              className="cursor-pointer hover:text-yellow-700"
+            />
             {!subLayer.includes('canvas') && (
               <FontAwesomeIcon
                 icon={faMagnifyingGlass}
