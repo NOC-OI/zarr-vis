@@ -69,7 +69,6 @@ export async function handleClickLegend(
   content,
   selectedLayers?
 ) {
-  console.log('handleClickLegend', layerInfo, subLayer, content, selectedLayers);
   const legendLayerName = `${content}_${subLayer}`;
   if (layerInfo.dataType === 'WMS') {
     if (Array.isArray(layerInfo.params.layers)) {
