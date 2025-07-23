@@ -10,7 +10,7 @@ This project explores fast, scalable methods for visualizing **Zarr-based multid
 
 Zarr is a powerful format for storing chunked, compressed N-dimensional arrays, widely used in climate and oceanography. However, visualizing Zarr efficiently on the web has remained a challenge. This project implements and compares multiple approaches:
 
-- Server-side dynamic tile rendering with [**titiler-multidim**](https://github.com/developmentseed/titiler)
+- Server-side dynamic tile rendering with [**titiler-multidim**](https://github.com/developmentseed/titiler-multidim)
 - Pure browser-side rendering using **WebGL + Mapbox**, inspired by [**carbonplan/maps**](https://github.com/carbonplan/maps)
 - Pure browser-side rendering using **WebGL + Mapbox**, using [**zarr-gl**](https://github.com/carderne/zarr-gl)
 - Optional rendering using Cloud-Optimized GeoTIFFs (COGs) and legacy WMS/WMTS tools like GeoServer
@@ -61,7 +61,7 @@ To add your own layers, modify the `src/application/data/layers-json.tsx` file. 
 
 ### Server-Side Tiling (Recommended for large datasets)
 
-- Uses [**titiler-multidim**](https://github.com/developmentseed/titiler) to dynamically generate tiles
+- Uses [**titiler-multidim**](https://github.com/developmentseed/titiler-multidim) to dynamically generate tiles
 - Deployed with FastAPI and auto-scaled via Knative (Kubernetes on JASMIN)
 - Optional Redis caching layer for low-latency access
 
@@ -87,7 +87,7 @@ To add your own layers, modify the `src/application/data/layers-json.tsx` file. 
 4. Save in Zarr v2 with `.zmetadata` consolidated
 5. Optionally export to NetCDF or COG for legacy tools
 
-For Python snippets and examples, see the [article](https://medium.com/...).
+For Python snippets and examples, see the [article](https://medium.com/@tobias.ramalho.ferreira/zarr-in-the-browser-fast-flexible-and-surprisingly-powerful-for-big-geo-data-eeb90ddf8a3d).
 
 ## 📸 Screenshots
 
@@ -105,7 +105,8 @@ For Python snippets and examples, see the [article](https://medium.com/...).
 
 ## Related Tools
 
-- [Titiler-Multidim](https://github.com/developmentseed/titiler)
+- [Titiler](https://github.com/developmentseed/titiler)
+- [Titiler-Multidim](https://github.com/developmentseed/titiler-multidim)
 - [Carbonplan Maps](https://github.com/carbonplan/maps)
 - [zarr-gl](https://github.com/carderne/zarr-gl)
 - [ndpyramid](https://github.com/carbonplan/ndpyramid)
