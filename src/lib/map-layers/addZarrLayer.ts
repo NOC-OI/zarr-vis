@@ -10,6 +10,7 @@ export class GetZarrLayer {
     this.layerName = layerName;
     this.actualLayer = actualLayer;
     this.layer = null;
+    this.url = layerName.url;
   }
 
   async getTile() {

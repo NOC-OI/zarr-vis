@@ -5,6 +5,7 @@ import { GetZarrLayer } from '@/lib/map-layers/addZarrLayer';
 import { colormapBuilder } from '@/lib/map-layers/jsColormaps';
 import { defaultOpacity } from '@/lib/map-layers/utils';
 import { ZarrLayer } from 'zarr-gl';
+import { updateOpacity } from './layers-handle';
 
 export async function generateSelectedLayer(
   actualLayer: string[],
@@ -50,6 +51,7 @@ export async function generateSelectedLayer(
               type: layer.source.type,
               source: layer.id
             });
+            updateOpacity(map, layer.id);
           }
         }
       }

@@ -4,7 +4,7 @@ import proj4 from 'proj4';
 import { colorScaleByName } from './jsColormaps';
 
 export const colorScale = chroma.scale(['#f00', '#0f0', '#00f', 'gray']).mode('hsl').colors(100);
-export const defaultOpacity = 0.7;
+export const defaultOpacity = 0.5;
 
 export function parseRangeString(rangeStr: string): number[] | string[] {
   let match = rangeStr.match(/range\((\d+),\s*(\d+),\s*(\d+)\)/);

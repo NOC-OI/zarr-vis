@@ -85,6 +85,28 @@ export const layersJson = {
         dataDescription: ['Salinity', ''],
         scale: [30, 37]
       },
+      ts_mean: {
+        url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/dcenti-17/DCENT_I_1.0.0.0_mean_spread/ts_mean',
+        dataType: 'ZARR',
+        content:
+          'DCENT-I: A Globally Infilled Extension of the Dynamically Consistent ENsemble of Temperature Dataset',
+        params: {
+          variable: 'ts_mean'
+        },
+        dataDescription: ['Temperature', 'DegC'],
+        scale: [-5, 5]
+      },
+      ts_std: {
+        url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/dcenti-17/DCENT_I_1.0.0.0_mean_spread/ts_std',
+        dataType: 'ZARR',
+        content:
+          'DCENT-I: A Globally Infilled Extension of the Dynamically Consistent ENsemble of Temperature Dataset',
+        params: {
+          variable: 'ts_std'
+        },
+        dataDescription: ['Temperature', 'DegC'],
+        scale: [-5, 5]
+      },
       'Currents canvas': {
         url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/',
         dataType: 'velocity-ZARR',

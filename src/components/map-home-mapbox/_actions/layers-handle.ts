@@ -1,5 +1,5 @@
 import { keyable } from '@/entities/models/keyable';
-import { defaultWMSBoundsMapbox } from '@/lib/map-layers/utils';
+import { defaultOpacity, defaultWMSBoundsMapbox } from '@/lib/map-layers/utils';
 import { generateSelectedLayer } from './get-layers';
 
 export function getBoundsFromBBox(bbox: number[] | null): [[number, number], [number, number]] {
@@ -95,6 +95,32 @@ export async function changeMapOpacity(
             map.current.setPaintProperty(styleLayer.id, 'custom-opacity', opacity);
           }
         }
+      }
+    }
+  }
+}
+
+export async function updateOpacity(map: any, actualLayer: string) {
+  const mapStyleLayers = map.current.getStyle().layers;
+
+  for (const styleLayer of mapStyleLayers) {
+    if (styleLayer.id.includes(actualLayer)) {
+      const type = styleLayer.type;
+      if (type === 'fill') {
+        map.current.setPaintProperty(styleLayer.id, 'fill-opacity', defaultOpacity);
+      } else if (type === 'line') {
+        map.current.setPaintProperty(styleLayer.id, 'line-opacity', defaultOpacity);
+      } else if (type === 'circle') {
+        map.current.setPaintProperty(styleLayer.id, 'circle-opacity', defaultOpacity);
+      } else if (type === 'symbol') {
+        map.current.setPaintProperty(styleLayer.id, 'icon-opacity', defaultOpacity);
+        map.current.setPaintProperty(styleLayer.id, 'text-opacity', defaultOpacity);
+      } else if (type === 'raster') {
+        map.current.setPaintProperty(styleLayer.id, 'raster-opacity', defaultOpacity);
+      } else if (type === 'fill-extrusion') {
+        map.current.setPaintProperty(styleLayer.id, 'fill-extrusion-opacity', defaultOpacity);
+      } else if (type === 'custom') {
+        map.current.setPaintProperty(styleLayer.id, 'custom-opacity', defaultOpacity);
       }
     }
   }
