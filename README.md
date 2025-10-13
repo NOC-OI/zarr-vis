@@ -101,7 +101,11 @@ For Python snippets and examples, see the [article](https://medium.com/@tobias.r
 
 ![Animated video showing velocity data from a zarr file being rendered as particle animation canvas in a map.](public/currents.gif)
 
-> Accessing Zarr data using the tile server and converting it into a canvas layer to represent the animated current fields on a map. You can interact with the dimensions of the data (time and depth).
+> Accessing Zarr data using `zarrita` and converting it into a canvas layer to represent the animated current fields on a map. You can interact with the dimensions of the data (time and depth).
+
+![Interact with the data by creating time series and spatial charts.](public/charts.gif)
+
+> Accessing Zarr data using `zarrita` for pixel-level inspection and creating time series and spatial charts.
 
 ## Related Tools
 
@@ -110,6 +114,7 @@ For Python snippets and examples, see the [article](https://medium.com/@tobias.r
 - [Carbonplan Maps](https://github.com/carbonplan/maps)
 - [zarr-gl](https://github.com/carderne/zarr-gl)
 - [ndpyramid](https://github.com/carbonplan/ndpyramid)
+- [zarrita](https://zarrita.dev/)
 - [windjs-over-mapbox](https://github.com/bumbeishvili/windjs-over-mapbox)
 - [js-colormaps](https://github.com/timothygebhard/js-colormaps)
 

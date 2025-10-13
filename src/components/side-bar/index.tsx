@@ -6,6 +6,8 @@ import { DataExplorationSelection } from '../data-exploration';
 import { InfoButtonBox } from '../info-button-box';
 import { LayerLegendBox } from '../layer-legend-box';
 import { SideBarLink } from './side-bar-link';
+import { LayerGraphBox } from '../layer-graph-box';
+import { useGraphManagementHandle } from '@/application/graph-management';
 
 interface SideBarProps {
   listLayers: keyable;
@@ -23,6 +25,7 @@ export function SideBar({ listLayers }: SideBarProps) {
     layerLegend,
     setLayerLegend
   } = useLayersManagementHandle();
+  const { layerGraph } = useGraphManagementHandle();
 
   useEffect(() => {
     Object.keys(layerLegend).forEach((legend: string) => {
@@ -64,13 +67,6 @@ export function SideBar({ listLayers }: SideBarProps) {
             active={sideBarOption === 'data_exploration'}
             icon={faMap}
           />
-          {/* <SideBarLink
-            title={'Clean map'}
-            id="clean_map"
-            onClick={handleEraseLayers}
-            active={false}
-            icon={faTrash}
-          /> */}
         </div>
         <div>
           <DataExplorationSelection
@@ -83,6 +79,7 @@ export function SideBar({ listLayers }: SideBarProps) {
       {Object.keys(layerLegend).map(legend => (
         <LayerLegendBox key={legend} layerLegendName={legend} />
       ))}
+      {Object.keys(layerGraph).length !== 0 && <LayerGraphBox />}
       {Object.keys(infoButtonBox).length !== 0 ? (
         <InfoButtonBox infoButtonBox={infoButtonBox} setInfoButtonBox={setInfoButtonBox} />
       ) : null}

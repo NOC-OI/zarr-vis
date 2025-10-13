@@ -1,6 +1,7 @@
 import { useLayersManagementHandle } from '@/application/layers-management';
 import { keyable } from '@/entities/models/keyable';
 import {
+  faChartSimple,
   faCircleInfo,
   faList,
   faMagnifyingGlass,
@@ -12,12 +13,14 @@ import {
   getPreviousOpacityValue,
   handleChangeMapLayerAndAddLegend,
   handleChangeOpacity,
+  handleClickGraphic,
   handleClickLayerInfo,
   handleClickLegend,
   handleClickSlider,
   handleClickZoom,
   verifyIfWasSelectedBefore
 } from './_actions/actions';
+import { useGraphManagementHandle } from '@/application/graph-management';
 
 interface DataExplorationTypeOptionsProps {
   content: string;
@@ -42,8 +45,8 @@ export function DataExplorationTypeOptions({
     zarrLayerProps,
     setZarrLayerProps
   } = useLayersManagementHandle();
+  const { setLayerGraph } = useGraphManagementHandle();
   const [opacityIsClicked, setOpacityIsClicked] = useState(false);
-
   return (
     <div className="text-xs">
       <div
@@ -125,6 +128,22 @@ export function DataExplorationTypeOptions({
                     setLayerAction,
                     selectedLayers,
                     setSelectedLayers
+                  )
+                }
+                className="cursor-pointer hover:text-yellow-700"
+              />
+            )}
+            {subLayers[subLayer].dataType === 'ZARR' && (
+              <FontAwesomeIcon
+                icon={faChartSimple}
+                title="Generate a graph"
+                onClick={() =>
+                  handleClickGraphic(
+                    subLayers[subLayer],
+                    subLayer,
+                    setLayerGraph,
+                    content,
+                    selectedLayers
                   )
                 }
                 className="cursor-pointer hover:text-yellow-700"

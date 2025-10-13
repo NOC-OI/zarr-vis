@@ -48,18 +48,26 @@ export function handleChangeOpacity(
   changeMapOpacity(layerInfo, e.target.value);
 }
 
-export function handleGenerateTimeSeriesGraph(
-  setClickPoint: any,
-  setActualLayer: any,
-  subLayers: any,
-  subLayer: any
-) {
-  setClickPoint((clickPoint: any) => !clickPoint);
-  setActualLayer([subLayers[subLayer].url]);
-}
-
 export function getPreviousOpacityValue(content: string, selectedLayers: any) {
   return selectedLayers[content].opacity;
+}
+
+export async function handleClickGraphic(
+  layerInfo,
+  subLayer,
+  setLayerGraph,
+  content,
+  selectedLayers
+) {
+  const graphLayerName = `${content}_${subLayer}`;
+  setLayerGraph({
+    layerName: graphLayerName,
+    layerInfo: { ...layerInfo },
+    selectedLayersKey: `${content}_${subLayer}`,
+    dataDescription: layerInfo.dataDescription,
+    dataType: layerInfo.dataType,
+    dimensions: selectedLayers[graphLayerName].dimensions
+  });
 }
 
 export async function handleClickLegend(
@@ -308,16 +316,6 @@ export function handleClickZoom(
 
 export function handleClickSlider(setOpacityIsClicked: any) {
   setOpacityIsClicked(opacityIsClicked => !opacityIsClicked);
-}
-
-export function handleGenerateGraph(
-  setGetPolyline: any,
-  setActualLayer: any,
-  subLayers: any,
-  subLayer: any
-) {
-  setGetPolyline((getPolyline: any) => !getPolyline);
-  setActualLayer([subLayers[subLayer].url]);
 }
 
 export function changeMapZoom(

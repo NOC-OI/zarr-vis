@@ -1,6 +1,8 @@
 import { keyable } from '@/entities/models/keyable';
 import { fromArrayBuffer } from 'geotiff';
-import { defaultOpacity, getWCSUrl, getZarrWCSUrl } from './utils';
+import { defaultOpacity, getWCSUrl } from './utils';
+import * as zarr from 'zarrita';
+import { identifyDimensionIndices } from '@/components/layer-graph-box/_actions/actions';
 
 export class AddCanvasLayer {
   layerName: keyable;
@@ -54,7 +56,112 @@ export class AddCanvasLayer {
     };
   }
 
-  async loadData(url: string, dataType: string) {
+  async loadData(dataType: string) {
+    try {
+      const store = new zarr.FetchStore(
+        this.url + this.layerName.params.layers[dataType === 'U' ? 0 : 1]
+      );
+      const zarrGroup = await zarr.open.v2(store, { kind: 'group' });
+      const variable = this.layerName.params.variable[dataType === 'U' ? 0 : 1];
+      const arrayLocation = await zarrGroup.resolve(variable);
+      const zarrArray = await zarr.open(arrayLocation, { kind: 'array' });
+
+      const metadata = zarrArray.attrs;
+
+      const dimNames = (metadata['_ARRAY_DIMENSIONS'] as string[]) || null;
+      if (!dimNames) {
+        console.error('No dimension information found in Zarr metadata');
+        return null;
+      }
+      const shape = zarrArray.shape;
+      const dimIndices = identifyDimensionIndices(dimNames);
+      if (dimIndices.lat === undefined || dimIndices.lon === undefined) {
+        console.error('Latitude or Longitude dimension not found in Zarr metadata');
+        return null;
+      }
+      const height = shape[dimIndices.lat.index];
+      const width = shape[dimIndices.lon.index];
+
+      const sliceArgs: any[] = new Array(shape.length).fill(0);
+      sliceArgs[dimIndices.lat.index] = zarr.slice(0, height);
+      sliceArgs[dimIndices.lon.index] = zarr.slice(0, width);
+      if (dimIndices.time !== undefined) {
+        sliceArgs[dimIndices.time.index] = this.layerName.dimensions[dimIndices.time.name].selected;
+      }
+      if (dimIndices.depth !== undefined) {
+        sliceArgs[dimIndices.depth.index] =
+          this.layerName.dimensions[dimIndices.depth.name].selected;
+      }
+
+      const rawData = (await zarr.get(zarrArray, sliceArgs)) as {
+        data: number[];
+      };
+
+      const values = rawData.data.map((value: number) => (value === -32768 ? null : value));
+
+      let latArray: number[] | null = null;
+      let lonArray: number[] | null = null;
+
+      try {
+        const latName = dimIndices.lat.name;
+        const lonName = dimIndices.lon.name;
+
+        const latLocation = await zarrGroup.resolve(latName);
+        const lonLocation = await zarrGroup.resolve(lonName);
+
+        const latZarr = await zarr.open(latLocation, { kind: 'array' });
+        const lonZarr = await zarr.open(lonLocation, { kind: 'array' });
+
+        const latData = await zarr.get(latZarr);
+        const lonData = await zarr.get(lonZarr);
+
+        latArray = Array.from(latData.data as Iterable<number>);
+        lonArray = Array.from(lonData.data as Iterable<number>);
+      } catch (err) {
+        console.warn('Could not load lat/lon coordinate arrays:', err);
+      }
+      let la1 = 90,
+        la2 = -90,
+        lo1 = -180,
+        lo2 = 180;
+      let dy = 1,
+        dx = 1;
+
+      if (latArray && lonArray && latArray.length > 1 && lonArray.length > 1) {
+        la1 = Math.max(...latArray);
+        la2 = Math.min(...latArray);
+        lo1 = Math.min(...lonArray);
+        lo2 = Math.max(...lonArray);
+        dy = Math.abs(latArray[1] - latArray[0]);
+        dx = Math.abs(lonArray[1] - lonArray[0]);
+      }
+
+      const velocityData = {
+        data: values,
+        header: {
+          parameterUnit: 'm.s-1',
+          parameterNumber: dataType === 'U' ? 2 : 3,
+          dx,
+          dy,
+          parameterNumberName: dataType === 'U' ? 'Eastward currents' : 'Northward currents',
+          la1,
+          la2,
+          parameterCategory: 2,
+          lo1,
+          lo2,
+          nx: width,
+          ny: height
+        }
+      };
+
+      return velocityData;
+    } catch (error) {
+      console.error('Error loading Zarr data:', error);
+      return null;
+    }
+  }
+
+  async loadDataBackEnd(url: string, dataType: string) {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -138,11 +245,14 @@ export class AddCanvasLayer {
     let velocityDataU;
     let velocityDataV;
     if (this.layerName.dataType.includes('ZARR')) {
-      const wcsUrlU = await getZarrWCSUrl(this.url, this.layerName, 0);
-      const wcsUrlV = await getZarrWCSUrl(this.url, this.layerName, 1);
+      // This part is commented out, as we are getting the data from the client side
+      // const wcsUrlU = await getZarrWCSUrl(this.url, this.layerName, 0);
+      // const wcsUrlV = await getZarrWCSUrl(this.url, this.layerName, 1);
 
-      velocityDataU = await this.loadData(wcsUrlU, 'U');
-      velocityDataV = await this.loadData(wcsUrlV, 'V');
+      // velocityDataU = await this.loadData(wcsUrlU, 'U');
+      // velocityDataV = await this.loadData(wcsUrlV, 'V');
+      velocityDataU = await this.loadData('U');
+      velocityDataV = await this.loadData('V');
     } else {
       const wcsUrlU = await getWCSUrl(
         this.url,
@@ -161,6 +271,7 @@ export class AddCanvasLayer {
       velocityDataU = await this.loadGeoraster(wcsUrlU, 'U');
       velocityDataV = await this.loadGeoraster(wcsUrlV, 'V');
     }
+
     const opacity = this.layerName.opacity ?? defaultOpacity;
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';

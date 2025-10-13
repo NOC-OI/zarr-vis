@@ -16,6 +16,7 @@ import {
   changeMapZoom,
   removeLayerFromMap
 } from './_actions/layers-handle';
+import { useGraphManagementHandle } from '@/application/graph-management';
 export const MapboxContext = createContext<{ map: mapboxgl.Map | null } | null>(null);
 
 export const useMapbox = () => {
@@ -32,12 +33,15 @@ export function MapHomeMapbox() {
     zarrLayerProps,
     windyLayerRef
   } = useLayersManagementHandle();
+  const { clickMap, setClickMap, setClickMapPoints, clickMapPoints } = useGraphManagementHandle();
   const zoom = 2;
   const center: [number, number] = [0, 0];
   const { setFlashMessage, setLoading } = useContextHandle();
 
   const map = useRef<mapboxgl.Map | null>(null);
   const [ready, setReady] = useState(false);
+  const markersRef = useRef<{ [key: string]: mapboxgl.Marker[] }>({});
+  const spatialPointsRef = useRef<mapboxgl.LngLat[]>([]);
 
   const ref = useCallback(node => {
     if (node !== null) {
@@ -78,6 +82,171 @@ export function MapHomeMapbox() {
     setLoading(false);
     setLayerAction('');
   }
+
+  const cleanupMapFeatures = useCallback((type?: string) => {
+    if (!map.current) return;
+
+    if (type) {
+      if (markersRef.current[type]) {
+        if (type === 'spatial' && markersRef.current[type].length < 2) {
+          return;
+        }
+        markersRef.current[type].forEach(marker => marker.remove());
+        delete markersRef.current[type];
+      }
+
+      if (type === 'spatial' && map.current.getLayer('spatial-line')) {
+        map.current.removeLayer('spatial-line');
+        map.current.removeSource('spatial-line');
+      }
+    } else {
+      ['time series', 'spatial'].forEach(key => {
+        if (markersRef.current[key]) {
+          markersRef.current[key].forEach(marker => marker.remove());
+        }
+      });
+      markersRef.current = {};
+
+      if (map.current.getLayer('spatial-line')) {
+        map.current.removeLayer('spatial-line');
+        map.current.removeSource('spatial-line');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(clickMapPoints).length === 0) {
+      cleanupMapFeatures();
+      spatialPointsRef.current = [];
+    } else {
+      Object.keys(markersRef.current).forEach(key => {
+        if (clickMapPoints.pointsType !== key) {
+          cleanupMapFeatures(key);
+          if (key === 'spatial') {
+            spatialPointsRef.current = [];
+          }
+        }
+      });
+    }
+  }, [clickMapPoints, cleanupMapFeatures]);
+
+  useEffect(() => {
+    if (map.current && clickMap === 'time series') {
+      map.current.getCanvas().style.cursor = 'crosshair';
+
+      const handleClick = (e: mapboxgl.MapMouseEvent) => {
+        const coords = e.lngLat;
+
+        cleanupMapFeatures('time series');
+        cleanupMapFeatures('spatial');
+        const marker = new mapboxgl.Marker({ color: '#00FF00' })
+          .setLngLat(coords)
+          .addTo(map.current!);
+
+        markersRef.current['time series'] = [marker];
+
+        setClickMapPoints({
+          pointsType: 'time series',
+          coords: coords
+        });
+
+        setClickMap('');
+        map.current?.getCanvas().style.removeProperty('cursor');
+      };
+
+      map.current.on('click', handleClick);
+
+      return () => {
+        if (map.current) {
+          map.current.off('click', handleClick);
+          map.current.getCanvas().style.removeProperty('cursor');
+        }
+      };
+    }
+  }, [clickMap, setClickMap, setClickMapPoints, setFlashMessage, cleanupMapFeatures]);
+
+  useEffect(() => {
+    if (map.current && clickMap === 'spatial') {
+      map.current.getCanvas().style.cursor = 'crosshair';
+
+      const handleClick = (e: mapboxgl.MapMouseEvent) => {
+        const coords = e.lngLat;
+        cleanupMapFeatures('spatial');
+        cleanupMapFeatures('time series');
+
+        spatialPointsRef.current.push(coords);
+
+        const marker = new mapboxgl.Marker({ color: '#00FF00' })
+          .setLngLat(coords)
+          .addTo(map.current!);
+
+        if (!markersRef.current['spatial']) {
+          markersRef.current['spatial'] = [];
+        }
+        markersRef.current['spatial'].push(marker);
+
+        if (spatialPointsRef.current.length === 2) {
+          const [point1, point2] = spatialPointsRef.current;
+
+          if (map.current!.getLayer('spatial-line')) {
+            map.current!.removeLayer('spatial-line');
+            map.current!.removeSource('spatial-line');
+          }
+
+          map.current!.addSource('spatial-line', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: [
+                  [point1.lng, point1.lat],
+                  [point2.lng, point2.lat]
+                ]
+              }
+            }
+          });
+
+          map.current!.addLayer({
+            id: 'spatial-line',
+            type: 'line',
+            source: 'spatial-line',
+            layout: {},
+            paint: {
+              'line-color': '#00FF00',
+              'line-width': 3
+            }
+          });
+          setClickMapPoints({
+            pointsType: 'spatial',
+            coords: {
+              point1: point1,
+              point2: point2
+            }
+          });
+
+          setFlashMessage({
+            messageType: 'success',
+            content: `Spatial line created between points`
+          });
+
+          setClickMap('');
+          map.current?.getCanvas().style.removeProperty('cursor');
+          spatialPointsRef.current = [];
+        }
+      };
+
+      map.current.on('click', handleClick);
+
+      return () => {
+        if (map.current) {
+          map.current.off('click', handleClick);
+          map.current.getCanvas().style.removeProperty('cursor');
+        }
+      };
+    }
+  }, [clickMap, setClickMap, setClickMapPoints, setFlashMessage, cleanupMapFeatures]);
 
   useEffect(() => {
     if (!map.current) return;
