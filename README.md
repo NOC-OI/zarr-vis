@@ -71,7 +71,7 @@ To add your own layers, modify the `src/application/data/layers-json.tsx` file. 
 
 You can see below an example of a Zarr layer configuration:
 
-```json
+```tsx
 export const layersJson = {
   My_own_layers: { // This is the name of the group of layers that will appear in the frontend
     layerNames: {
