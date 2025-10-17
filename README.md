@@ -45,7 +45,19 @@ cd zarr-vis
 npm install
 ```
 
-### 3. Start the development server
+### 3. Update the environment variables
+
+Create a `.env.local` file in the root directory and add your environment variables. You can use the `.env.example` file as a reference. You can see below an example of the required variables:
+
+```
+NEXT_PUBLIC_MAPBOX_API_KEY=<SOME_API_KEY>
+NEXT_PUBLIC_TILE_SERVER_URL=https://imfe-pilot-tileserver.noc.ac.uk/
+NEXT_PUBLIC_ZARR_TILE_SERVER_URL=https://atlantis44.xyz/
+```
+
+For the `NEXT_PUBLIC_MAPBOX_API_KEY`, you can get a free API key by signing up at [Mapbox](https://www.mapbox.com/).
+
+### 4. Start the development server
 
 ```bash
 npm run dev
@@ -53,9 +65,50 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 4. (OPTIONAL) Add your own layers
+### 5. (OPTIONAL) Add your own layers
 
 To add your own layers, modify the `src/application/data/layers-json.tsx` file. You can add Zarr datasets or other compatible layers by following the existing format.
+
+You can see below an example of a Zarr layer configuration:
+
+```json
+export const layersJson = {
+  My_own_layers: { // This is the name of the group of layers that will appear in the frontend
+    layerNames: {
+      my_own_carbonplan_layer: { // Unique layer identifier that will be used in the code and frontend
+        url: "https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr", // URL to the Zarr dataset
+        dataType: "carbonplan", // using carbonplan/maps
+        content:
+          "Some information about the dataset goes here.",
+        params: {
+          variable: "sos_abs" // variable name in the Zarr file
+        },
+        dimensions: { // the dimensions available in the dataset besides x and y. This is mandatory for carbonplan/maps
+          time: {
+            selected: 0, // default selected index
+            values: 'range(1,152,1)' // can be an array of values or a range
+          }
+        },
+        dataDescription: ['Salinity', ''], // The description of the data to show in the legend
+        colors: 'jet', // colormap to use (from matplotlib colormaps)
+        scale: [30, 37] // min and max values for the color scale
+      },
+      my_own_titiler_layer: { // Unique layer identifier that will be used in the code and frontend
+        url: "https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr", // URL to the Zarr dataset
+        dataType: "ZARR", // using titiler-multidim
+        content:
+          "Some information about the dataset goes here.",
+        params: {
+          variable: "sos_abs" // variable name in the Zarr file
+        },
+        dataDescription: ['Salinity', ''], // The description of the data to show in the legend
+        colors: 'jet', // colormap to use (from matplotlib colormaps)
+        scale: [30, 37] // min and max values for the color scale
+      },
+    }
+  }
+};
+```
 
 ## Architecture
 
